@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Product, DeliveryFee, Sale, AppState, ProductCategory, UnitType, PaymentMethod 
 } from './types';
@@ -13,27 +13,69 @@ import { Logo } from './components/Logo';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'inventory' | 'pos' | 'reports' | 'posterior'>('dashboard');
-  const [products, setProducts] = useState<Product[]>([
-    { id: '1', name: 'Açaí Premium (Self-Service)', price: 52.00, category: ProductCategory.ACAI_CREMES, unitType: UnitType.WEIGHT },
-    { id: '2', name: 'Sorvetes (Self-Service)', price: 52.00, category: ProductCategory.ACAI_CREMES, unitType: UnitType.WEIGHT },
-    { id: '3', name: 'Hamburguer Normal', price: 14.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
-    { id: '4', name: 'X-Baicon', price: 17.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
-    { id: '5', name: 'X-Tudo', price: 20.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
-    { id: '6', name: 'X-frango', price: 20.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
-    { id: '7', name: 'Salgados', price: 10.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
-    { id: '8', name: 'Coca-cola 2L', price: 15.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
-    { id: '9', name: 'Coca-cola 1L', price: 10.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
-    { id: '10', name: 'Coca-cola LT 350ml', price: 6.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
-    { id: '11', name: 'São Geraldo 2L', price: 15.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
-    { id: '12', name: 'São Geraldo 1L', price: 10.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
-    { id: '13', name: 'São Geraldo LT 350ml', price: 10.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
-    { id: '14', name: 'Água mineral', price: 3.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
-  ]);
-  const [deliveryFees, setDeliveryFees] = useState<DeliveryFee[]>([
-    { id: 'f1', region: 'Centro', value: 5.00 },
-    { id: 'f2', region: 'Vila Nova', value: 8.00 },
-  ]);
-  const [sales, setSales] = useState<Sale[]>([]);
+  const [products, setProducts] = useState<Product[]>(() => {
+    const saved = localStorage.getItem('acai_products');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse products from localStorage', e);
+      }
+    }
+    return [
+      { id: '1', name: 'Açaí Premium (Self-Service)', price: 52.00, category: ProductCategory.ACAI_CREMES, unitType: UnitType.WEIGHT },
+      { id: '2', name: 'Sorvetes (Self-Service)', price: 52.00, category: ProductCategory.ACAI_CREMES, unitType: UnitType.WEIGHT },
+      { id: '3', name: 'Hamburguer Normal', price: 14.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
+      { id: '4', name: 'X-Baicon', price: 17.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
+      { id: '5', name: 'X-Tudo', price: 20.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
+      { id: '6', name: 'X-frango', price: 20.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
+      { id: '7', name: 'Salgados', price: 10.00, category: ProductCategory.SNACKS, unitType: UnitType.UNIT },
+      { id: '8', name: 'Coca-cola 2L', price: 15.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
+      { id: '9', name: 'Coca-cola 1L', price: 10.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
+      { id: '10', name: 'Coca-cola LT 350ml', price: 6.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
+      { id: '11', name: 'São Geraldo 2L', price: 15.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
+      { id: '12', name: 'São Geraldo 1L', price: 10.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
+      { id: '13', name: 'São Geraldo LT 350ml', price: 10.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
+      { id: '14', name: 'Água mineral', price: 3.00, category: ProductCategory.DRINKS, unitType: UnitType.UNIT },
+    ];
+  });
+  const [deliveryFees, setDeliveryFees] = useState<DeliveryFee[]>(() => {
+    const saved = localStorage.getItem('acai_deliveryFees');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse deliveryFees from localStorage', e);
+      }
+    }
+    return [
+      { id: 'f1', region: 'Centro', value: 5.00 },
+      { id: 'f2', region: 'Vila Nova', value: 8.00 },
+    ];
+  });
+  const [sales, setSales] = useState<Sale[]>(() => {
+    const saved = localStorage.getItem('acai_sales');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse sales from localStorage', e);
+      }
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('acai_products', JSON.stringify(products));
+  }, [products]);
+
+  useEffect(() => {
+    localStorage.setItem('acai_deliveryFees', JSON.stringify(deliveryFees));
+  }, [deliveryFees]);
+
+  useEffect(() => {
+    localStorage.setItem('acai_sales', JSON.stringify(sales));
+  }, [sales]);
 
   const appState: AppState = { products, deliveryFees, sales };
 
